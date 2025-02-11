@@ -20,9 +20,11 @@ const char* password = "WIFI_PASSWORD";
 // Configurações dos Botões
 // ========================
 const int buttonBackPin = 25;    // Botão para voltar
+const int buttonManualPin = 26;  // Botão para atualizar manualmente
 const int buttonForwardPin = 27; // Botão para avançar
 bool lastButtonBackState    = HIGH;
 bool lastButtonForwardState = HIGH;
+bool lastButtonManualState = HIGH;
 
 // ========================
 // Intervalos (em milissegundos)
@@ -324,6 +326,8 @@ void setup() {
   // Configura os botões com resistor pull-up interno
   pinMode(buttonBackPin, INPUT_PULLUP);
   pinMode(buttonForwardPin, INPUT_PULLUP);
+  pinMode(buttonManualPin, INPUT_PULLUP);
+
   
   // Primeira atualização da API
   updateCurrenciesFromAPI();
@@ -357,6 +361,17 @@ void loop() {
   // Navegação manual via botões
   bool currentBackState    = digitalRead(buttonBackPin);
   bool currentForwardState = digitalRead(buttonForwardPin);
+  bool currentManualState = digitalRead(buttonManualPin);
+    if (lastButtonManualState == HIGH && currentManualState == LOW) {
+      // Chama a atualização manualmente
+      updateCurrenciesFromAPI();
+      // Atualiza o timer para evitar que o update automático ocorra logo em seguida
+      lastUpdateTime = millis();
+      // Atualiza a tela para refletir os novos valores
+      drawScreen(currentScreen);
+      delay(200); // debounce
+    }
+lastButtonManualState = currentManualState;
   
   if (lastButtonBackState == HIGH && currentBackState == LOW) {
     currentScreen = (currentScreen - 1 + 4) % 4;
@@ -374,3 +389,4 @@ void loop() {
   
   delay(50);
 }
+
