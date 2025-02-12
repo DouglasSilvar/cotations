@@ -362,16 +362,24 @@ void loop() {
   bool currentBackState    = digitalRead(buttonBackPin);
   bool currentForwardState = digitalRead(buttonForwardPin);
   bool currentManualState = digitalRead(buttonManualPin);
-    if (lastButtonManualState == HIGH && currentManualState == LOW) {
-      // Chama a atualização manualmente
-      updateCurrenciesFromAPI();
-      // Atualiza o timer para evitar que o update automático ocorra logo em seguida
-      lastUpdateTime = millis();
-      // Atualiza a tela para refletir os novos valores
-      drawScreen(currentScreen);
-      delay(200); // debounce
-    }
-lastButtonManualState = currentManualState;
+  if (lastButtonManualState == HIGH && currentManualState == LOW) {
+    // Desenha a mensagem "Update" na área do cabeçalho
+    // (Ajuste a largura e altura conforme necessário para limpar a região)
+    tft.fillRect(10, 5, 220, 30, TFT_BLACK);  // Limpa a área onde o nome é exibido
+    tft.setTextColor(TFT_ORANGE, TFT_BLACK);
+    tft.setTextSize(3);
+    tft.drawString("Update ...", 10, 5);
+    
+    // Chama a atualização manual
+    updateCurrenciesFromAPI();
+    // Atualiza o timer para evitar conflito com o update automático
+    lastUpdateTime = millis();
+    // Redesenha a tela com os valores atualizados
+    drawScreen(currentScreen);
+    
+    delay(200); // debounce
+  }
+  lastButtonManualState = currentManualState;
   
   if (lastButtonBackState == HIGH && currentBackState == LOW) {
     currentScreen = (currentScreen - 1 + 4) % 4;
